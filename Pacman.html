@@ -1,0 +1,258 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+ <head>
+  <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+ </head>
+ <style>
+	*{
+		padding:0px;
+		margin:0px;
+		font-family: verdana;
+	}
+
+	.pacman{
+		border-radius: 50%;
+		border: 30px solid #EA301C;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+	}
+	.east{
+		border-right: 30px solid transparent;
+	}
+	.west{
+		border-left: 30px solid transparent;
+	}
+	.north{
+		border-top: 30px solid transparent;
+	}
+	.south{
+		border-bottom: 30px solid transparent;
+	}
+   #pacmanContainer{
+  	width:550px;
+	height:550px;
+	border:1px;
+	border-color: #000000;
+	border-style: solid;
+	 position: absolute;
+    top: 50px;
+    left: 50px;     
+}
+ 
+     .outer_container {
+         position:absolute;
+         left:50px;
+     }
+     .reportContainer {
+         position: absolute;
+         left: 100px;
+         top:625px;
+     }
+     .instructionContainer {
+         width: 500px;
+         height: 300px;
+         border: 1px;
+         border-color: #000000;
+         border-style: solid;
+         position: absolute;
+         left: 700px;
+         top: 50px;
+         font-size:12px;
+         padding-left: 5px;
+         padding-top:5px;
+     }
+ </style>
+ <body>
+     <div class="outer_container">
+         <br />
+         <span>Command : </span><input type="text" id="txtcommand" style="width:300px"/>
+         <button onclick="excecuteCommand()">Execute</button>
+         <div id="pacmanContainer">
+             <div style="left:50px">
+                 <hr />
+             </div>
+             <div class="pacman"></div>
+         </div>
+     </div>
+     <div class="reportContainer"><label id="lblReport"></label></div>
+     <div class="instructionContainer">
+         <span><b>Instructions:</b></span>
+         <ul style="padding-left:20px">
+             <li>
+                 <p>Input command to the Textbox and click Execute button</p>
+             </li>
+             <li>
+                 <p>First valid command to Pacman is a PLACE command</p>
+             </li>
+             <li>
+                 <p>PLACE will put the Pacman on the grid in positon X,Y and facing NORTH,SOUTH, EAST or WEST.
+                 <br />
+                     Ex: PLACE 0,0,NORTH
+                     <br />
+                     PLACE 4,1,SOUTH
+                 </p>
+             </li>
+             <li>
+                 <p>MOVE will move Pacman one unit forward in the direction it is currently facing</p>
+             </li>
+             <li>
+                 <p>LEFT and RIGHT will rotate Pacman 90 degrees in the specified direction without changing the position of Pacman.</p>
+             </li>
+             <li>
+                 <p>REPORT will announce the X,Y and F of Pacman</p>
+             </li>
+         </ul>
+     </div>
+ </body>
+</html>
+<script>
+    var direction = "east";
+    var valid_inputToStart = false;
+    var max_width = 500;
+    var max_height = 500;
+
+$(document).ready(function(){
+    placePacMan(0, 500, "EAST");
+    valid_inputToStart = false;
+});  
+ 
+excecuteCommand = function () {
+    var command = $('#txtcommand').val();
+    var command_withargs = command.split(' ');
+    $('#lblReport').html('');
+    var exc_command = command_withargs[0];
+    //CheckvalidStart()       
+    switch (exc_command) {
+        case "LEFT":
+            console.log(direction);
+            if (valid_inputToStart) {
+                if (direction != "west") {
+                    direction = "west";
+                    faceDirection();
+                }
+            }
+            break;
+        case "RIGHT":
+            if (valid_inputToStart) {
+                if (direction != "east") {
+                    direction = "east";
+                    faceDirection();
+                }
+            }
+            break;
+        case "MOVE":
+            if (valid_inputToStart) {
+                var pok_west = parseInt($(".pacman").css("left"));
+                var pok_top = parseInt($(".pacman").css("top"));
+                move(pok_west, pok_top);
+            }
+            break;
+        case "REPORT":
+            if (valid_inputToStart) {
+                var position_X = parseInt($(".pacman").css("left")) / 100;
+                var position_Y = parseInt($(".pacman").css("top")) / 100;
+                $('#lblReport').html('Output: ' + position_X + ',' + position_Y + ' ' + direction.toUpperCase());
+            }
+            break;
+        case "PLACE":
+            console.log({ exc_command: exc_command });
+            console.log({ exc_command_length: exc_command[1].length });
+            if (command_withargs[1].length > 3) {
+                var args = command_withargs[1].split(',');
+                var position_x = parseInt(args[0]) * 100;
+                var position_y = parseInt(args[1]) * 100;
+                console.log({ position_x: position_x, position_y: position_y })
+                if (position_x <= max_width && position_y <= max_height) {
+                    var position_face = args[2];
+                    placePacMan(position_x, position_y, position_face);
+                }
+                else {
+                    $('#lblReport').html('Invalid command! Ignored.');
+                }
+            }
+            else {
+                $('#lblReport').html('Invalid command! Ignored.');
+            }
+            break;
+        default:
+            $('#lblReport').html('Invalid command! Ignored.');
+            break;
+    }
+}
+
+move = function (pok_left, pok_top) {
+    var can_move = 1;
+   
+    if (direction == "east" || direction == "west")
+        move_direction = "left";
+    else if (direction == "south" || direction == "north")
+        move_direction = "top";
+
+    if (direction == "east" || direction == "south") {
+
+        if (direction == "east")
+            if ((pok_left < 0 || (pok_left + 80) > max_width))
+                can_move = 0;
+
+        if (direction == "south")
+            if (pok_top < 0 || (pok_top + 85) > max_height)
+                can_move = 0;
+
+        if (can_move)
+            $(".pacman").css(move_direction, parseInt($(".pacman").css(move_direction)) + 100);
+    }
+    else if (direction == "west" || direction == "north")
+        if (parseInt($(".pacman").css(move_direction)) > 0)
+            $(".pacman").css(move_direction, parseInt($(".pacman").css(move_direction)) - 100);
+}
+
+faceDirection = function () {
+    switch (direction) {
+        case "west":
+            $(".pacman").removeClass("south").removeClass("north").removeClass("east").addClass(direction);
+            break;
+        case "north":
+            $(".pacman").removeClass("west").removeClass("east").removeClass("south").addClass(direction);
+            break;
+        case "east":
+            $(".pacman").removeClass("north").removeClass("south").removeClass("west").addClass(direction);
+            break;
+        case "south":
+            $(".pacman").removeClass("west").removeClass("east").removeClass("north").addClass(direction);
+            break;
+    }
+}
+
+placePacMan = function (left, top, position_face) {
+    var can_move = 1;
+    
+    move(left, top);
+    if (direction != position_face) {
+        direction = position_face.toLowerCase();
+        faceDirection();
+    }
+    if (direction == "east" || direction == "south") {
+        if (direction == "east") {
+            if ((left < 0 || (left ) > max_width))
+            { can_move = 0; }
+        }
+        if (direction == "south") {
+            if (top < 0 || (top) > max_height)
+            { can_move = 0; }
+        }
+    }
+    if (direction == "west" || direction == "north")
+        if (parseInt($(".pacman").css(position_face)) > 0)
+        { can_move = 1; }
+
+    if (can_move) {
+        $(".pacman").css("left", left);
+        $(".pacman").css("top", top);
+        valid_inputToStart = true;
+    }
+    else {
+        $('#lblReport').html('Invalid command! Ignored.');
+    }
+}
+</script>
