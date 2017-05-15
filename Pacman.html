@@ -124,21 +124,53 @@ excecuteCommand = function () {
     var exc_command = command_withargs[0];
     //CheckvalidStart()       
     switch (exc_command) {
-        case "LEFT":
+        case "RIGHT":
             console.log(direction);
             if (valid_inputToStart) {
-                if (direction != "west") {
-                    direction = "west";
-                    faceDirection();
+                switch (direction)
+                {
+                    case "east":
+                        direction = "north";
+                        break;
+                    case "north":
+                        direction = "west";
+                        break;
+                    case "west":
+                        direction = "south";
+                        break;
+                    case "south":
+                        direction = "east";
+                        break;
                 }
+                faceDirection();
+                //if (direction != "west") {
+                //    direction = "west";
+                //    faceDirection();
+                //}
             }
             break;
-        case "RIGHT":
+        case "LEFT":
             if (valid_inputToStart) {
-                if (direction != "east") {
-                    direction = "east";
-                    faceDirection();
+                switch (direction)
+                {
+                    case "east":
+                        direction = "south";
+                        break;
+                    case "north":
+                        direction = "east";
+                        break;
+                    case "west":
+                        direction = "north";
+                        break;
+                    case "south":
+                        direction = "west";
+                        break;
                 }
+                faceDirection();
+                //if (direction != "east") {
+                //    direction = "east";
+                //    faceDirection();
+                //}
             }
             break;
         case "MOVE":
